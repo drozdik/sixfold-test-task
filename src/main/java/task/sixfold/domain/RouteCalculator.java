@@ -96,19 +96,4 @@ public class RouteCalculator {
         return airport.getConnections().stream().map(c -> c.getIdentifier()).collect(Collectors.toList());
     }
 
-    public String getIataByIcao(String icao) {
-        AirportIdentifier id = icaoToId.get(icao);
-        if (id == null) {
-            return null;
-        }
-        return id.getIata();
-    }
-
-    public AirportIdentifier getAirportIdentifier(String value) {
-        try {
-            return getId(value);
-        } catch (RuntimeException e) {
-            return null;
-        }
-    }
 }

@@ -2,16 +2,14 @@ package task.sixfold.algo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import task.sixfold.domain.AirportIdentifier;
 
 public class Coordinates {
     Logger logger = LoggerFactory.getLogger(Coordinates.class);
-    private double latitude, longitude, elevation;
+    private final double latitude;
+    private final double longitude;
+    private final double elevation;
 
     public Coordinates(double latitude, double longitude, double elevation) {
-        if (latitude <= 0.0 || longitude <= 0.0 || elevation <= 0.0) {
-            logger.warn("Coordintaes weird {} {} {}", latitude, longitude, elevation);
-        }
         this.latitude = latitude;
         this.longitude = longitude;
         this.elevation = elevation;
@@ -28,7 +26,7 @@ public class Coordinates {
      * @returns Distance in Meters
      */
     public double distance(double lat1, double lat2, double lon1,
-                                  double lon2, double el1, double el2) {
+                           double lon2, double el1, double el2) {
 
         final int R = 6371; // Radius of the earth
 

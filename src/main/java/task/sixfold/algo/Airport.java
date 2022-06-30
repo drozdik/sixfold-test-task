@@ -9,12 +9,6 @@ public class Airport {
     private Set<Airport> connected = new HashSet<>();
     private double distanceFromDestination;
 
-    public double getShortestPathDistance() {
-        return shortestPathDistance;
-    }
-
-    private double shortestPathDistance;
-
     public Airport(String identifier, Coordinates coordinates) {
         this.identifier = identifier;
         this.coordinates = coordinates;
@@ -69,11 +63,4 @@ public class Airport {
         return identifier;
     }
 
-    public Airport getClosestToDestinationConnection() {
-        return getSortedConnections().get(0);
-    }
-
-    public void setShortestPathDistance(double distance) {
-
-    }
 }

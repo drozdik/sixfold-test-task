@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import task.sixfold.domain.AirportIdentifier;
 import task.sixfold.domain.Result;
 import task.sixfold.domain.RouteCalculator;
 import task.sixfold.file.AirportRecord;
@@ -24,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -33,6 +31,7 @@ import static java.util.stream.Collectors.toList;
 public class SixfoldTestTaskApplication {
     private final RouteCalculator calculator;
     Logger logger = LoggerFactory.getLogger(SixfoldTestTaskApplication.class);
+    private final Airports airports = new Airports();
 
     public SixfoldTestTaskApplication(RouteCalculator calculator) {
         this.calculator = calculator;
@@ -42,9 +41,6 @@ public class SixfoldTestTaskApplication {
         SpringApplication.run(SixfoldTestTaskApplication.class, args);
     }
 
-    private Airports airports = new Airports();
-
-
     @PostConstruct
     public void loadAirportRecords() {
         AirportsFileReader airportsFileReader = new AirportsFileReader();
@@ -52,7 +48,6 @@ public class SixfoldTestTaskApplication {
         airports.loadRecords(airportRecords);
     }
 
-    // endpoint which takes two
     @GetMapping(path = "/from/{fromId}/to/{toId}")
     public ResponseEntity<Object> shortestRoute(@PathVariable String fromId, @PathVariable String toId) {
         long startTime = System.nanoTime();
@@ -62,7 +57,6 @@ public class SixfoldTestTaskApplication {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid airport identifiers: %s ", missingKeys));
         }
 
-        // calculate
         Result result;
         try {
             result = calculator.shortestRouteBetween(fromId, toId);
@@ -86,12 +80,6 @@ public class SixfoldTestTaskApplication {
         return ResponseEntity.ok(payload);
     }
 
-    private AirportIdentifier getAirportIdentifier(String value) {
-        return calculator.getAirportIdentifier(value);
-    }
-
-    // from, to
-    // route [ airport payload ... up to 5 ]
     @GetMapping("airport/{airportId}")
     public Object getAirportConnections(@PathVariable String airportId) {
         return calculator.getAirportConnections(airportId);

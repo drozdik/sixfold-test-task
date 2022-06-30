@@ -1,8 +1,6 @@
 package task.sixfold.domain;
 
 import org.junit.jupiter.api.Test;
-import task.sixfold.IataOrIcao;
-import task.sixfold.algo.Route;
 import task.sixfold.file.AirportRecord;
 import task.sixfold.file.AirportsFileReader;
 import task.sixfold.file.RouteRecord;
