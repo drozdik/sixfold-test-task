@@ -41,6 +41,7 @@ public class SixfoldTestTaskApplication {
     public ResponseEntity<Object> shortestRoute(@PathVariable String fromId, @PathVariable String toId) {
         long startTime = System.nanoTime();
 
+        // validate
         AirportIdentifier a = getAirportIdentifier(fromId);
         AirportIdentifier b = getAirportIdentifier(toId);
         if (a == null || b == null) {
@@ -53,7 +54,17 @@ public class SixfoldTestTaskApplication {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid airport identifiers: %s ", invalid));
         }
-        Result result = calculator.shortestRouteBetween(fromId, toId);
+
+        // calculate
+        Result result;
+        try {
+            result = calculator.shortestRouteBetween(fromId, toId);
+        } catch (RuntimeException e) {
+            if (e.getMessage().startsWith("None reached destination")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("Did not find any valid route between %s and %s", fromId, toId));
+            }
+            throw e;
+        }
 
         RoutePayload payload = new RoutePayload();
         AirportPayload from = new AirportPayload();

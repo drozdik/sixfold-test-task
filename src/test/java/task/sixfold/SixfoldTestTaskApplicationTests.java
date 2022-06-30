@@ -27,12 +27,7 @@ class SixfoldTestTaskApplicationTests {
     private RouteCalculator calculator;
 
     @Test
-    void contextLoads() {
-        assertThat(mockMvc).isNotNull();
-    }
-
-    @Test
-    void get200() throws Exception {
+    void response_200_when_valid_route_was_found() throws Exception {
         AirportRecord tallinn = AirportRecord.from("" +
                 "415,\"Lennart Meri Tallinn Airport\",\"Tallinn-ulemiste International\",\"Estonia\",\"TLL\",\"EETN\"" +
                 ",59.41329956049999,24.832799911499997,131,2,\"E\",\"Europe/Tallinn\",\"airport\",\"OurAirports\" ");
@@ -54,11 +49,31 @@ class SixfoldTestTaskApplicationTests {
     }
 
     @Test
-    void response_400_if_unknown_airport_ids() throws Exception {
+    void response_400_if_airport_id_is_unknown() throws Exception {
         // when then
         mockMvc.perform(MockMvcRequestBuilders.get("/from/invalid_foo/to/invalid_bar"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().string(allOf(
                         containsStringIgnoringCase("invalid_foo"), containsStringIgnoringCase("invalid_bar"))));
+    }
+
+    @Test
+    void response_404_if_not_found_any_valid_routes() throws Exception {
+        AirportRecord tallinn = AirportRecord.from("" +
+                "415,\"Lennart Meri Tallinn Airport\",\"Tallinn-ulemiste International\",\"Estonia\",\"TLL\",\"EETN\"" +
+                ",59.41329956049999,24.832799911499997,131,2,\"E\",\"Europe/Tallinn\",\"airport\",\"OurAirports\" ");
+        AirportRecord riga = AirportRecord.from("" +
+                "3953,\"Riga International Airport\",\"Riga\",\"Latvia\",\"RIX\",\"EVRA\"" +
+                ",56.92359924316406,23.971099853515625,36,2,\"E\",\"Europe/Riga\",\"airport\",\"OurAirports\"" +
+                "");
+        calculator.loadAirportRecords(List.of(tallinn, riga));
+
+        // NO ROUTES LOADED, MEANS NO CONNECTION BETWEEN TLL AND RIX
+
+        // when then
+        mockMvc.perform(MockMvcRequestBuilders.get("/from/tll/to/rix"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().string(allOf(
+                        containsStringIgnoringCase("TLL"), containsStringIgnoringCase("RIX"))));
     }
 }
