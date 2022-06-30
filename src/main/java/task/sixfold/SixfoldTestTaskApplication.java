@@ -30,8 +30,8 @@ import static java.util.stream.Collectors.toList;
 @RestController
 public class SixfoldTestTaskApplication {
     private final RouteCalculator calculator;
-    Logger logger = LoggerFactory.getLogger(SixfoldTestTaskApplication.class);
     private final Airports airports = new Airports();
+    Logger logger = LoggerFactory.getLogger(SixfoldTestTaskApplication.class);
 
     public SixfoldTestTaskApplication(RouteCalculator calculator) {
         this.calculator = calculator;
@@ -61,14 +61,9 @@ public class SixfoldTestTaskApplication {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid airport identifiers: %s ", missingKeys));
         }
 
-        Result result;
-        try {
-            result = calculator.shortestRouteBetween(fromId, toId);
-        } catch (RuntimeException e) {
-            if (e.getMessage().startsWith("None reached destination")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("Did not find any valid route between %s and %s", fromId, toId));
-            }
-            throw e;
+        Result result = calculator.shortestRouteBetween(fromId, toId);
+        if (result.route == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("Did not find any valid route between %s and %s", fromId, toId));
         }
 
         Map<String, Object> payload = new HashMap<>();
@@ -78,6 +73,9 @@ public class SixfoldTestTaskApplication {
                 .map(icao -> AirportPayload.from(airports.getRecord(icao)))
                 .collect(toList()));
         payload.put("distance", distanceInKm(result.distance));
+        payload.put("numberOfAlternativeRoutes", result.numberOfAlternativeRoutes);
+        payload.put("totalLegsGrown", result.totalLegsGrown);
+        payload.put("timeSpent", result.timeSpendMillis + " ms");
 
         long requestTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
         logger.info("Handled request within {} ms", requestTime);
