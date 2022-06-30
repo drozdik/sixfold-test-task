@@ -1,18 +1,19 @@
 package task.sixfold.algo;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 public class Airport {
     public final String identifier;
     private final Coordinates coordinates;
-    private List<Airport> connected = new ArrayList<>();
+    private Set<Airport> connected = new HashSet<>();
     private double distanceFromDestination;
+
+    public double getShortestPathDistance() {
+        return shortestPathDistance;
+    }
+
+    private double shortestPathDistance;
 
     public Airport(String identifier, Coordinates coordinates) {
         this.identifier = identifier;
@@ -28,7 +29,7 @@ public class Airport {
     }
 
     public List<Airport> getConnections() {
-        return connected;
+        return new ArrayList<>(connected);
     }
 
     public List<Airport> getSortedConnections() {
@@ -66,5 +67,13 @@ public class Airport {
 
     public String getIdentifier() {
         return identifier;
+    }
+
+    public Airport getClosestToDestinationConnection() {
+        return getSortedConnections().get(0);
+    }
+
+    public void setShortestPathDistance(double distance) {
+
     }
 }

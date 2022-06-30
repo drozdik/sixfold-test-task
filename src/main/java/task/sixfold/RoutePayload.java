@@ -5,6 +5,15 @@ import java.util.List;
 public class RoutePayload {
     AirportPayload from, to;
     List<AirportPayload> route;
+    double distance;
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
 
     public List<AirportPayload> getRoute() {
         return route;

@@ -7,14 +7,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import task.sixfold.domain.AirportIdentifier;
+import task.sixfold.domain.Result;
 import task.sixfold.domain.RouteCalculator;
 import task.sixfold.file.AirportRecord;
 import task.sixfold.file.AirportsFileReader;
 import task.sixfold.file.RouteRecord;
 import task.sixfold.file.RoutesFileReader;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -38,7 +37,7 @@ public class SixfoldTestTaskApplication {
     @GetMapping(path = "/from/{fromId}/to/{toId}")
     public RoutePayload shortestRoute(@PathVariable String fromId, @PathVariable String toId) {
         long startTime = System.nanoTime();
-        List<String> route = calculator.shortestRouteBetween(fromId, toId);
+        Result result = calculator.shortestRouteBetween(fromId, toId);
 
         RoutePayload payload = new RoutePayload();
         AirportPayload from = new AirportPayload();
@@ -47,11 +46,13 @@ public class SixfoldTestTaskApplication {
         to.ICAO = toId;
         payload.from = from;
         payload.to = to;
-        payload.route = route.stream().map(icao -> {
+        payload.route = result.route.stream().map(icao -> {
             AirportPayload p = new AirportPayload();
             p.ICAO = icao;
+            p.IATA = calculator.getIataByIcao(icao);
             return p;
         }).collect(Collectors.toList());
+        payload.distance = result.distance;
         long requestTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
         logger.info("Handled request within {} ms", requestTime);
         return payload;

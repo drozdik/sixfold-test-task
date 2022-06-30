@@ -3,7 +3,6 @@ package task.sixfold.domain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import task.sixfold.IataOrIcao;
 import task.sixfold.algo.Airport;
 import task.sixfold.algo.Center;
 import task.sixfold.algo.Coordinates;
@@ -37,15 +36,18 @@ public class RouteCalculator {
         icaoToId.clear();
         iataToId.clear();
         records.forEach(r -> {
-            Airport airport = new Airport(r.ICAO, new Coordinates(Integer.parseInt(r.latitude.split("\\.")[0]), Integer.parseInt(r.longitude.split("\\.")[0])));
             AirportIdentifier identifier = new AirportIdentifier(r.IATA, r.ICAO);
+            if (identifier.getIcao() == null && identifier.getIcao() == null) {
+                logger.warn("Skipping airport record where both IATA and ICAO null {}", r);
+            }
+            Airport airport = new Airport(r.ICAO, new Coordinates(Double.parseDouble(r.latitude), Double.parseDouble(r.longitude), Double.parseDouble(r.altitude)));
             map.put(identifier, airport);
             icaoToId.put(r.ICAO, identifier);
             iataToId.put(r.IATA, identifier);
         });
     }
 
-    public List<String> shortestRouteBetween(String fromId, String toId) {
+    public Result shortestRouteBetween(String fromId, String toId) {
         AirportIdentifier sourceId = getId(fromId);
         Airport sourceAirport = map.get(sourceId);
 
@@ -53,10 +55,11 @@ public class RouteCalculator {
         Airport destAirport = map.get(destId);
 
         Route route = center.findShortestRoute(sourceAirport, destAirport, new ArrayList<>(map.values()));
-        return route.airports.stream().map(airport -> airport.identifier).collect(Collectors.toList());
+        return new Result(route.airports.stream().map(airport -> airport.identifier).collect(Collectors.toList()), route.calculateDistance());
     }
 
     public void loadRouteRecords(List<RouteRecord> records) {
+        // there are same 'connections' from different airlines, let's merge them , only connections important now
         records.forEach(record -> {
             try {
                 AirportIdentifier sourceId = getId(record.sourceAirport);
@@ -86,5 +89,13 @@ public class RouteCalculator {
     public List<String> getAirportConnections(String airportId) {
         Airport airport = map.get(getId(airportId));
         return airport.getConnections().stream().map(c -> c.getIdentifier()).collect(Collectors.toList());
+    }
+
+    public String getIataByIcao(String icao) {
+        AirportIdentifier id = icaoToId.get(icao);
+        if (id == null) {
+            return null;
+        }
+        return id.getIata();
     }
 }

@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Route {
     public static int legsGrown = 0;
-    public List<Airport> airports = new ArrayList<>();
+    public ArrayList<Airport> airports = new ArrayList<>();
 
     public Route(Airport... airports) {
         this.airports.addAll(List.of(airports));
@@ -38,9 +38,9 @@ public class Route {
         String str = "Route: ";
         for (int i = 0; i < airports.size(); i++) {
             Airport airport = airports.get(i);
-            str += String.format("(%s)", airport.identifier );
+            str += String.format("(%s)", airport.identifier);
             if (i < airports.size() - 1) {
-                str += String.format("-%.2f-", airport.distanceFrom(airports.get(i+1)));
+                str += String.format("-%.2f-", airport.distanceFrom(airports.get(i + 1)));
             }
         }
         str += String.format(" :: %.2f", calculateDistance());
@@ -52,7 +52,15 @@ public class Route {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Route route = (Route) o;
-        return airports.equals(route.airports);
+        if (airports.size() != route.airports.size()) {
+            return false;
+        }
+        for (int i = 0; i < route.airports.size(); i++) {
+            if (!airports.get(i).equals(route.airports.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

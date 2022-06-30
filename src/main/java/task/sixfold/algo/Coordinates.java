@@ -1,23 +1,57 @@
 package task.sixfold.algo;
 
-public class Coordinates {
-    private int x, y;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import task.sixfold.domain.AirportIdentifier;
 
-    public Coordinates(int x, int y) {
-/*
-        if (x < 0 || y < 0 || x > 9 || y > 9) {
-            throw new RuntimeException(String.format("Invalid coordinates for a grid 10x10 %d %d", x, y));
+public class Coordinates {
+    Logger logger = LoggerFactory.getLogger(Coordinates.class);
+    private double latitude, longitude, elevation;
+
+    public Coordinates(double latitude, double longitude, double elevation) {
+        if (latitude <= 0.0 || longitude <= 0.0 || elevation <= 0.0) {
+            logger.warn("Coordintaes weird {} {} {}", latitude, longitude, elevation);
         }
-*/
-        this.x = x;
-        this.y = y;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.elevation = elevation;
+    }
+
+    /**
+     * Calculate distance between two points in latitude and longitude taking
+     * into account height difference. If you are not interested in height
+     * difference pass 0.0. Uses Haversine method as its base.
+     * <p>
+     * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters
+     * el2 End altitude in meters
+     *
+     * @returns Distance in Meters
+     */
+    public double distance(double lat1, double lat2, double lon1,
+                                  double lon2, double el1, double el2) {
+
+        final int R = 6371; // Radius of the earth
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c * 1000; // convert to meters
+
+        double height = el1 - el2;
+
+        distance = Math.pow(distance, 2) + Math.pow(height, 2);
+
+        double result = Math.sqrt(distance);
+        if (result <= 0.0) {
+            logger.warn("Distance is 0 or negative {}", result);
+        }
+        return result;
     }
 
     public double distanceFrom(Coordinates another) {
-        double distance = Math.sqrt(
-                Math.pow(this.x - another.x, 2) + Math.pow(this.y - another.y, 2)
-        );
-//        System.out.println(String.format("Calculated distance is %f", distance));
-        return distance;
+        return distance(this.latitude, another.latitude, this.longitude, another.longitude, this.elevation, another.elevation);
     }
 }

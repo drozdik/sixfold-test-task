@@ -12,9 +12,11 @@ import java.util.stream.Collectors;
 
 public class Center {
     public List<Route> routes = new ArrayList<>();
+    public List<Route> finishedRoutes = new ArrayList<>();
     Logger logger = LoggerFactory.getLogger(Center.class);
     private Airport destination;
     private Route currentShortest;
+    private Route lastActive;
 
     // sooo, 1 cut off unnecessary routes, multiple tactics can be implemented >> again how to be fully sure that they were indeed unnecessary
     // encourage 'grow' routes with better chance first, but how to know when to stop checking others?, that there no more viable/better options
@@ -31,24 +33,113 @@ public class Center {
     // можно отметать другие ветви по "предсказанию" дистанции если "отклонился слишком сильно" и нет шанса переплюнуть
     // существующий тогда нет смысла дальше отращивать эту ветку
     public Route findShortestRoute(Airport start, Airport destination, List<Airport> allAirports) {
-        // reset
         long startTime = System.nanoTime();
+
+        // reset
         this.routes = new ArrayList<>();
+        this.finishedRoutes = new ArrayList<>();
         this.destination = destination;
         assignDistance(allAirports);
+        double shortestPathDistance = 0.0; // not sure
+
+
         Route r = new Route(start);
         routes.add(r);
+        // before step back, store shortest distance from this node
         // when it finishes? when all routes stuck or finished(means reached destination
-        while (unfinishedRoutes().size() > 0) {
-            // if we have let's say 5 finished routes, let's stop for now
-/*
-            if (hasFinishedRoutes(5)) {
-                break;
+        // while route can grow or branch
+        Airport prev = null;
+        while (r.airports.size() > 0) {
+            List<Airport> connections = r.getTip().getSortedConnections();
+            Airport next = null;
+            for (int i = prev != null ? connections.indexOf(prev) + 1 : 0; i < connections.size(); i++) {
+                Airport option = connections.get(i);
+                if (r.airports.contains(option)) {
+                    continue;// avoid loop
+                }
+                // first optimization
+                if (currentShortest != null && r.calculateDistance() + option.distanceFrom(destination) > currentShortest.calculateDistance()) {
+                    continue;
+                }
+                next = option;
+                break; // after next assigned
             }
+            if (next != null) {
+                r.addAirport(next);
+                prev = null;
+            }
+            if (next == null || next.equals(destination) || r.airports.size() == 5) {
+                if (next != null && next.equals(destination)) {
+                    Route route = r.copy();
+                    finishedRoutes.add(route);
+                    currentShortest = finishedRoutes.stream().sorted(Comparator.comparingDouble(Route::calculateDistance)).findFirst().get();
+                    logger.info("Finished route {}", route);
+                }
+                routes.add(r.copy());
+                prev = r.pop();
+                //prev.setShortestPathDistance(shortestPathDistance); not sure about this yet
+            }
+        }
+        logger.info("Total branched routes {}", routes.size());
+
+
+        /////////////////////////////////////////
+/*
+        boolean canGrowOrBranch = true;
+        while (canGrowOrBranch) {
+
+            r.addAirport(r.getTip().getClosestToDestinationConnection());
+
+            // need to branch
+            boolean reachedDestination = r.getTip().equals(destination);
+            boolean stuck = r.getTip().getConnections().isEmpty();
+            boolean grewMaxLegs = r.airports.size() == 3;
+            if (grewMaxLegs || stuck || reachedDestination) {
+                routes.add(r.copy());
+
+                // step back and search for option
+                Airport next = null;
+                while (next == null) {
+
+                    if (r.getTip().equals(start)) {
+                        canGrowOrBranch = false;
+                        break;
+                    }
+
+                    // leave best route from here to destination
+                    Airport prev = r.pop();
+
+                    List<Airport> connections = r.getTip().getSortedConnections();
+                    for (int i = connections.indexOf(prev) + 1; i < connections.size(); i++) {
+
+                        Airport option = connections.get(i);
+                        boolean willCreateLoop = r.airports.contains(option);
+                        if (willCreateLoop) {
+                            continue;
+                        }
+
+                        next = option;
+                        break;
+                    }
+
+                }
+                if (next != null) {
+                    r.addAirport(next);
+                }
+
+            }
+        }
 */
+        return finishedRoutes.stream().sorted(Comparator.comparingDouble(route -> route.calculateDistance())).findFirst().orElseThrow(() -> new RuntimeException("None reached destination"));
+    }
+    // branch or grow further
+
+    // if reachedDestination
+    // if stuck // no connections further
+    // grewMaxLegs
+/*
             unfinishedRoutes().forEach(route -> {
-                logger.info("Examine another route");
-                // first time at this airport, picking most attractive connection
+                lastActive = route;
                 Airport next = route.getTip().getSortedConnections().get(0); // with the least distance to destination
                 route.addAirport(next);
                 checkForShortest();
@@ -80,6 +171,9 @@ public class Center {
                             }
                             Airport nextForBranch = connections.get(i);
                             if (lastLegLeft(branch) && !nextForBranch.equals(destination)) {
+                                break;
+                            }
+                            if (!nextForBranch.equals(destination) && nextForBranch.getConnections().isEmpty()) {
                                 continue;
                             }
                             // can't be shorter than shortest so far, narrowed to 30 routes and 59 legs
@@ -90,6 +184,10 @@ public class Center {
                                 }
                             }
                             branch.addAirport(nextForBranch);
+                            if (routes.contains(branch)) {
+                                logger.warn("DUPLICATE ROUTE");
+                            }
+
                             routes.add(branch);
 
 
@@ -121,7 +219,8 @@ public class Center {
         long algoTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
         logger.info("Found route within {} ms", algoTime);
         return shortestRoute;
-    }
+*/
+
 
     private void checkForShortest() {
         this.currentShortest = this.routes.stream().filter(route -> route.getTip().equals(destination)).sorted(Comparator.comparingDouble(Route::calculateDistance)).findFirst().orElse(null);
@@ -154,7 +253,7 @@ public class Center {
                 .filter(route ->
                         route.getTip() != null &&
                                 !route.getTip().equals(destination) &&
-                                !route.getTip().getConnections().isEmpty() &&
+                                !route.getTip().getConnections().isEmpty() &&// this stops everythin earlier as expected
                                 route.airports.size() != 5)
                 .collect(Collectors.toList());
     }

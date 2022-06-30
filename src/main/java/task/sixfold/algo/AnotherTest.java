@@ -3,7 +3,9 @@ package task.sixfold.algo;
 import java.util.List;
 
 public class AnotherTest {
+/*
     public static void main(String[] args) {
+*/
 /*
         Route.legsGrown = 0;
         find_route_with_one_leg();
@@ -21,7 +23,8 @@ public class AnotherTest {
         everything_connected();
         Route.legsGrown = 0;
         something_connected();
-*/
+*//*
+
         everything_connected();
     }
 
@@ -201,11 +204,13 @@ public class AnotherTest {
         }
 //        System.out.println("Expected:\n" + expected);
 //        System.out.println("Actual:\n" + route);
-        /*
+        */
+/*
         12 airports, all interconnected gives:
         TOTAL ROUTES BUILD: 11111
         TOTAL LEGS GROWN: 12221
-         */
+         *//*
+
 
     }
 
@@ -290,4 +295,5 @@ public class AnotherTest {
         // when
         Route route = center.findShortestRoute(a, z, List.of(a, aa, ab, ac, ad, z));
     }
+*/
 }

@@ -32,7 +32,7 @@ class RouteCalculatorTest {
         calculator.loadRouteRecords(List.of(tallinn_to_riga));
 
         // when
-        List<String> route = calculator.shortestRouteBetween(tallinn.ICAO, riga.ICAO);
+        List<String> route = calculator.shortestRouteBetween(tallinn.ICAO, riga.ICAO).route;
 
         // then
         assertThat(route).containsExactly(tallinn.ICAO, riga.ICAO);
@@ -61,7 +61,7 @@ class RouteCalculatorTest {
         calculator.loadRouteRecords(List.of(tallinn_to_riga));
 
         // when
-        List<String> route = calculator.shortestRouteBetween(tallinn.ICAO, riga.ICAO);
+        List<String> route = calculator.shortestRouteBetween(tallinn.ICAO, riga.ICAO).route;
         List<String> evraConnections = calculator.getAirportConnections("EVRA");
 
         // then
