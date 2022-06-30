@@ -75,6 +75,11 @@ public class RouteCalculator {
         });
     }
 
+    public void loadRecords(List<AirportRecord> airports, List<RouteRecord> routes) {
+        loadAirportRecords(airports);
+        loadRouteRecords(routes);
+    }
+
     private AirportIdentifier getId(String key) {
         key = key.toUpperCase();
         if (iataToId.containsKey(key)) {
