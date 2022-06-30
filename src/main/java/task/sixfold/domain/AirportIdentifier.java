@@ -38,6 +38,13 @@ public class AirportIdentifier {
         return iata;
     }
 
+    public boolean hasIata() {
+        return iata != null;
+    }
+    public boolean hasIcao() {
+        return icao != null;
+    }
+
     public void setIata(String iata) {
         this.iata = iata;
     }

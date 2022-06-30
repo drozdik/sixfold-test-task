@@ -43,7 +43,10 @@ class SixfoldTestTaskApplicationTests {
         // when then
         mockMvc.perform(MockMvcRequestBuilders.get("/from/tll/to/rix"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.from", not(blankOrNullString())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.from.ICAO", equalToIgnoringCase("EETN")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.from.ITAO", equalToIgnoringCase("TLL")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.from.name", is("Lennart Meri Tallinn Airport")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.from.city", is("Tallinn-ulemiste International")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.to", not(blankOrNullString())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.route.length()", is(2)));
     }

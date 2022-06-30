@@ -17,16 +17,18 @@ import task.sixfold.file.AirportsFileReader;
 import task.sixfold.file.RouteRecord;
 import task.sixfold.file.RoutesFileReader;
 
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @SpringBootApplication
 @RestController
 public class SixfoldTestTaskApplication {
-    Logger logger = LoggerFactory.getLogger(SixfoldTestTaskApplication.class);
-
     private final RouteCalculator calculator;
+    Logger logger = LoggerFactory.getLogger(SixfoldTestTaskApplication.class);
 
     public SixfoldTestTaskApplication(RouteCalculator calculator) {
         this.calculator = calculator;
@@ -34,6 +36,16 @@ public class SixfoldTestTaskApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SixfoldTestTaskApplication.class, args);
+    }
+
+    private Airports airports = new Airports();
+
+
+    @PostConstruct
+    public void loadAirportRecords() {
+        AirportsFileReader airportsFileReader = new AirportsFileReader();
+        List<AirportRecord> airportRecords = airportsFileReader.readFile();
+        airports.loadRecords(airportRecords);
     }
 
     // endpoint which takes two
@@ -67,19 +79,16 @@ public class SixfoldTestTaskApplication {
         }
 
         RoutePayload payload = new RoutePayload();
-        AirportPayload from = new AirportPayload();
-        from.ICAO = fromId;
-        AirportPayload to = new AirportPayload();
-        to.ICAO = toId;
+        AirportPayload from = AirportPayload.from(airports.getRecord(fromId));
+        AirportPayload to = AirportPayload.from(airports.getRecord(toId));
         payload.from = from;
         payload.to = to;
         payload.route = result.route.stream().map(icao -> {
-            AirportPayload p = new AirportPayload();
-            p.ICAO = icao;
-            p.IATA = calculator.getIataByIcao(icao);
+            AirportPayload p = AirportPayload.from(airports.getRecord(icao));
             return p;
         }).collect(Collectors.toList());
         payload.distance = result.distance;
+
         long requestTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
         logger.info("Handled request within {} ms", requestTime);
         return ResponseEntity.ok(payload);
