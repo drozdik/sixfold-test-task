@@ -18,11 +18,15 @@ import task.sixfold.file.RouteRecord;
 import task.sixfold.file.RoutesFileReader;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @SpringBootApplication
 @RestController
@@ -69,16 +73,13 @@ public class SixfoldTestTaskApplication {
             throw e;
         }
 
-        RoutePayload payload = new RoutePayload();
-        AirportPayload from = AirportPayload.from(airports.getRecord(fromId));
-        AirportPayload to = AirportPayload.from(airports.getRecord(toId));
-        payload.from = from;
-        payload.to = to;
-        payload.route = result.route.stream().map(icao -> {
-            AirportPayload p = AirportPayload.from(airports.getRecord(icao));
-            return p;
-        }).collect(Collectors.toList());
-        payload.distance = result.distance;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("from", AirportPayload.from(airports.getRecord(fromId)));
+        payload.put("to", AirportPayload.from(airports.getRecord(toId)));
+        payload.put("route", result.route.stream()
+                .map(icao -> AirportPayload.from(airports.getRecord(icao)))
+                .collect(toList()));
+        payload.put("distance", distanceInKm(result.distance));
 
         long requestTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
         logger.info("Handled request within {} ms", requestTime);
@@ -104,6 +105,12 @@ public class SixfoldTestTaskApplication {
         RoutesFileReader routesFileReader = new RoutesFileReader();
         List<RouteRecord> routeRecords = routesFileReader.readFile();
         calculator.loadRouteRecords(routeRecords);
+    }
+
+    private String distanceInKm(double distanceInMeters) {
+        BigDecimal inKm = BigDecimal.valueOf(distanceInMeters).divide(BigDecimal.valueOf(1000));
+        DecimalFormat df = new DecimalFormat("###.00");
+        return df.format(inKm) + " km";
     }
 
 }
