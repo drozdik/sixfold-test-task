@@ -1,5 +1,8 @@
 package task.sixfold.file;
 
+import task.sixfold.algo.Airport;
+import task.sixfold.algo.Coordinates;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -76,5 +79,10 @@ public class AirportRecord {
         // append last token
         tokens.add(token);
         return (String[]) tokens.toArray(new String[tokens.size()]);
+    }
+
+    public Airport toAirportNode() {
+        Airport airport = new Airport(ICAO, new Coordinates(Double.parseDouble(latitude), Double.parseDouble(longitude), Double.parseDouble(altitude)));
+        return airport;
     }
 }

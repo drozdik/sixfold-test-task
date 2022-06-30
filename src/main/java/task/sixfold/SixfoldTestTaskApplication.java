@@ -45,7 +45,11 @@ public class SixfoldTestTaskApplication {
     public void loadAirportRecords() {
         AirportsFileReader airportsFileReader = new AirportsFileReader();
         List<AirportRecord> airportRecords = airportsFileReader.readFile();
+        RoutesFileReader routesFileReader = new RoutesFileReader();
+        List<RouteRecord> routeRecords = routesFileReader.readFile();
+
         airports.loadRecords(airportRecords);
+        calculator.loadRecords(airportRecords, routeRecords);
     }
 
     @GetMapping(path = "/from/{fromId}/to/{toId}")
@@ -82,17 +86,10 @@ public class SixfoldTestTaskApplication {
 
     @GetMapping("airport/{airportId}")
     public Object getAirportConnections(@PathVariable String airportId) {
-        return calculator.getAirportConnections(airportId);
-    }
-
-    @GetMapping("load")
-    public void load() {
-        AirportsFileReader airportsFileReader = new AirportsFileReader();
-        List<AirportRecord> airportRecords = airportsFileReader.readFile();
-        calculator.loadAirportRecords(airportRecords);
-        RoutesFileReader routesFileReader = new RoutesFileReader();
-        List<RouteRecord> routeRecords = routesFileReader.readFile();
-        calculator.loadRouteRecords(routeRecords);
+        return calculator.getAirportConnections(airportId).stream()
+                .map(iataOrIcao -> airports.getRecord(iataOrIcao))
+                .map(AirportPayload::from)
+                .collect(toList());
     }
 
     private String distanceInKm(double distanceInMeters) {
