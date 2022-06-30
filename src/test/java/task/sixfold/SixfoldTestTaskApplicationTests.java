@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -45,11 +44,21 @@ class SixfoldTestTaskApplicationTests {
 
         RouteRecord tallinn_to_riga = RouteRecord.from("BT,333,TLL,415,RIX,3953,,0,73C DH4");
         calculator.loadRouteRecords(List.of(tallinn_to_riga));
+
         // when then
         mockMvc.perform(MockMvcRequestBuilders.get("/from/tll/to/rix"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.from", not(blankOrNullString())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.to", not(blankOrNullString())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.route.length()", is(2)));
+    }
+
+    @Test
+    void response_400_if_unknown_airport_ids() throws Exception {
+        // when then
+        mockMvc.perform(MockMvcRequestBuilders.get("/from/invalid_foo/to/invalid_bar"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string(allOf(
+                        containsStringIgnoringCase("invalid_foo"), containsStringIgnoringCase("invalid_bar"))));
     }
 }

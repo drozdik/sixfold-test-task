@@ -98,4 +98,12 @@ public class RouteCalculator {
         }
         return id.getIata();
     }
+
+    public AirportIdentifier getAirportIdentifier(String value) {
+        try {
+            return getId(value);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
 }

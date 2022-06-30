@@ -4,9 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import task.sixfold.domain.AirportIdentifier;
 import task.sixfold.domain.Result;
 import task.sixfold.domain.RouteCalculator;
 import task.sixfold.file.AirportRecord;
@@ -35,8 +38,21 @@ public class SixfoldTestTaskApplication {
 
     // endpoint which takes two
     @GetMapping(path = "/from/{fromId}/to/{toId}")
-    public RoutePayload shortestRoute(@PathVariable String fromId, @PathVariable String toId) {
+    public ResponseEntity<Object> shortestRoute(@PathVariable String fromId, @PathVariable String toId) {
         long startTime = System.nanoTime();
+
+        AirportIdentifier a = getAirportIdentifier(fromId);
+        AirportIdentifier b = getAirportIdentifier(toId);
+        if (a == null || b == null) {
+            String invalid = "";
+            if (a == null) {
+                invalid += fromId + " ";
+            }
+            if (b == null) {
+                invalid += toId;
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid airport identifiers: %s ", invalid));
+        }
         Result result = calculator.shortestRouteBetween(fromId, toId);
 
         RoutePayload payload = new RoutePayload();
@@ -55,7 +71,11 @@ public class SixfoldTestTaskApplication {
         payload.distance = result.distance;
         long requestTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
         logger.info("Handled request within {} ms", requestTime);
-        return payload;
+        return ResponseEntity.ok(payload);
+    }
+
+    private AirportIdentifier getAirportIdentifier(String value) {
+        return calculator.getAirportIdentifier(value);
     }
 
     // from, to
