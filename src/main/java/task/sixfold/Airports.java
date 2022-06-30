@@ -3,6 +3,7 @@ package task.sixfold;
 import task.sixfold.domain.AirportIdentifier;
 import task.sixfold.file.AirportRecord;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,5 +42,16 @@ public class Airports {
             return null;
         }
         return records.get(id);
+    }
+
+    public List missingAny(String from, String to) {
+        List<String> missing = new ArrayList<>();
+        if (getId(from) == null) {
+            missing.add(from);
+        }
+        if (getId(to) == null) {
+            missing.add(to);
+        }
+        return missing;
     }
 }

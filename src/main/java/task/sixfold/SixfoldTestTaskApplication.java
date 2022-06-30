@@ -53,18 +53,9 @@ public class SixfoldTestTaskApplication {
     public ResponseEntity<Object> shortestRoute(@PathVariable String fromId, @PathVariable String toId) {
         long startTime = System.nanoTime();
 
-        // validate
-        AirportIdentifier a = getAirportIdentifier(fromId);
-        AirportIdentifier b = getAirportIdentifier(toId);
-        if (a == null || b == null) {
-            String invalid = "";
-            if (a == null) {
-                invalid += fromId + " ";
-            }
-            if (b == null) {
-                invalid += toId;
-            }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid airport identifiers: %s ", invalid));
+        List missingKeys = airports.missingAny(fromId, toId);
+        if (!missingKeys.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid airport identifiers: %s ", missingKeys));
         }
 
         // calculate
