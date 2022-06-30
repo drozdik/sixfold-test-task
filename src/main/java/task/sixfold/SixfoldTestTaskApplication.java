@@ -49,7 +49,7 @@ public class SixfoldTestTaskApplication {
         List<RouteRecord> routeRecords = routesFileReader.readFile();
 
         airports.loadRecords(airportRecords);
-        calculator.loadRecords(airportRecords, routeRecords);
+        calculator.buildModel(airports, routeRecords);
     }
 
     @GetMapping(path = "/from/{fromId}/to/{toId}")

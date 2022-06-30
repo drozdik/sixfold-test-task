@@ -6,12 +6,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class Center {
+public class MyAlgo {
     public List<Route> routes = new ArrayList<>();
     public List<Route> finishedRoutes = new ArrayList<>();
-    Logger logger = LoggerFactory.getLogger(Center.class);
+    Logger logger = LoggerFactory.getLogger(MyAlgo.class);
     private Airport destination;
     private Route currentShortest;
 

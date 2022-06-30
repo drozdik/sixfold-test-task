@@ -3,14 +3,19 @@ package task.sixfold;
 import task.sixfold.domain.AirportIdentifier;
 import task.sixfold.file.AirportRecord;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Airports {
     private final HashMap<String, AirportIdentifier> iataToId = new HashMap<>();
     private final HashMap<String, AirportIdentifier> icaoToId = new HashMap<>();
     private final HashMap<AirportIdentifier, AirportRecord> records = new HashMap<>();
+
+    public Airports(List<AirportRecord> airportRecords) {
+        loadRecords(airportRecords);
+    }
+    public Airports() {
+
+    }
 
     public AirportIdentifier getId(String iataOrIcao) {
         iataOrIcao = iataOrIcao.toUpperCase();
@@ -53,5 +58,13 @@ public class Airports {
             missing.add(to);
         }
         return missing;
+    }
+
+    public Collection<AirportRecord> allRecords() {
+        return records.values();
+    }
+
+    public Set<Map.Entry<AirportIdentifier, AirportRecord>> entries() {
+        return records.entrySet();
     }
 }

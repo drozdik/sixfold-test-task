@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CenterTest {
-    private Center center = new Center();
+class MyAlgoTest {
+    private MyAlgo myAlgo = new MyAlgo();
 
     @Test
     void shortest_route_between_tallinn_and_riga() {
@@ -43,7 +43,7 @@ class CenterTest {
         // it will be good to convert just into list of identifiers
         List<Airport> model = List.of(start, destination);
         start.addConnectionWith(destination);
-        Route result = center.findShortestRoute(start, destination, model);
+        Route result = myAlgo.findShortestRoute(start, destination, model);
         List<String> idsOfShortestRoute = result.airports.stream().map(airport -> airport.identifier).collect(Collectors.toList());
 
         // then
@@ -55,11 +55,13 @@ class CenterTest {
     void route_between_tallinn_and_tokyo() {
         AirportsFileReader airportsFileReader = new AirportsFileReader();
         List<AirportRecord> airportRecords = airportsFileReader.readFile();
+        Airports airports = new Airports();
+        airports.loadRecords(airportRecords);
         RoutesFileReader routesFileReader = new RoutesFileReader();
         List<RouteRecord> routeRecords = routesFileReader.readFile();
 
         RouteCalculator calculator = new RouteCalculator();
-        calculator.loadRecords(airportRecords, routeRecords);
+        calculator.buildModel(airports, routeRecords);
 
         Result result = calculator.shortestRouteBetween("tll", "hnd");
 

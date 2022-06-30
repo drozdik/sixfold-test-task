@@ -12,6 +12,7 @@ import task.sixfold.domain.RouteCalculator;
 import task.sixfold.file.AirportRecord;
 import task.sixfold.file.RouteRecord;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,10 +36,9 @@ class SixfoldTestTaskApplicationTests {
                 "3953,\"Riga International Airport\",\"Riga\",\"Latvia\",\"RIX\",\"EVRA\"" +
                 ",56.92359924316406,23.971099853515625,36,2,\"E\",\"Europe/Riga\",\"airport\",\"OurAirports\"" +
                 "");
-        calculator.loadAirportRecords(List.of(tallinn, riga));
-
         RouteRecord tallinn_to_riga = RouteRecord.from("BT,333,TLL,415,RIX,3953,,0,73C DH4");
-        calculator.loadRouteRecords(List.of(tallinn_to_riga));
+        calculator.buildModel(new Airports(List.of(tallinn, riga)), List.of(tallinn_to_riga));
+
 
         // when then
         mockMvc.perform(MockMvcRequestBuilders.get("/from/tll/to/rix"))
@@ -69,7 +69,7 @@ class SixfoldTestTaskApplicationTests {
                 "3953,\"Riga International Airport\",\"Riga\",\"Latvia\",\"RIX\",\"EVRA\"" +
                 ",56.92359924316406,23.971099853515625,36,2,\"E\",\"Europe/Riga\",\"airport\",\"OurAirports\"" +
                 "");
-        calculator.loadAirportRecords(List.of(tallinn, riga));
+        calculator.buildModel(new Airports(List.of(tallinn, riga)), Collections.emptyList());
 
         // NO ROUTES LOADED, MEANS NO CONNECTION BETWEEN TLL AND RIX
 
