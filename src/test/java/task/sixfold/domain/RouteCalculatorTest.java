@@ -45,21 +45,4 @@ class RouteCalculatorTest {
         // then
         assertThat(route).containsExactly(tallinn.ICAO, riga.ICAO);
     }
-
-    @Test
-    void using_real_files() {
-        AirportsFileReader airportsFileReader = new AirportsFileReader();
-        List<AirportRecord> airportRecords = airportsFileReader.readFile();
-        RoutesFileReader routesFileReader = new RoutesFileReader();
-        List<RouteRecord> routeRecords = routesFileReader.readFile();
-        calculator.buildModel(new Airports(airportRecords), routeRecords);
-
-        // when
-        List<String> route = calculator.shortestRouteBetween("tll", "rix").route;
-        List<String> evraConnections = calculator.getAirportConnections("EVRA");
-
-        // then
-        assertThat(route).containsExactly("EETN", "EVRA");
-    }
-
 }

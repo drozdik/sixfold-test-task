@@ -18,6 +18,9 @@ import task.sixfold.file.RoutesFileReader;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -42,11 +45,13 @@ public class SixfoldTestTaskApplication {
     }
 
     @PostConstruct
-    public void loadAirportRecords() {
+    public void loadAirportRecords() throws URISyntaxException {
+        Path airportsPath = Paths.get(AirportsFileReader.class.getClassLoader().getResource("airports.dat").toURI());
+        Path routesPath = Paths.get(RoutesFileReader.class.getClassLoader().getResource("routes.dat").toURI());
         AirportsFileReader airportsFileReader = new AirportsFileReader();
-        List<AirportRecord> airportRecords = airportsFileReader.readFile();
+        List<AirportRecord> airportRecords = airportsFileReader.readFile(airportsPath);
         RoutesFileReader routesFileReader = new RoutesFileReader();
-        List<RouteRecord> routeRecords = routesFileReader.readFile();
+        List<RouteRecord> routeRecords = routesFileReader.readFile(routesPath);
 
         airports.loadRecords(airportRecords);
         calculator.buildModel(airports, routeRecords);
