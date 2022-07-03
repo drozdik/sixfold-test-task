@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +18,10 @@ import task.sixfold.file.RouteRecord;
 import task.sixfold.file.RoutesFileReader;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +46,9 @@ public class SixfoldTestTaskApplication {
     }
 
     @PostConstruct
-    public void loadAirportRecords() throws URISyntaxException {
-        Path airportsPath = Paths.get(AirportsFileReader.class.getClassLoader().getResource("airports.dat").toURI());
-        Path routesPath = Paths.get(RoutesFileReader.class.getClassLoader().getResource("routes.dat").toURI());
+    public void loadAirportRecords() throws URISyntaxException, IOException {
+        InputStream airportsPath = new ClassPathResource("airports.dat").getInputStream();
+        InputStream routesPath = new ClassPathResource("routes.dat").getInputStream();
         AirportsFileReader airportsFileReader = new AirportsFileReader();
         List<AirportRecord> airportRecords = airportsFileReader.readFile(airportsPath);
         RoutesFileReader routesFileReader = new RoutesFileReader();
