@@ -46,7 +46,7 @@ public class SixfoldTestTaskApplication {
     }
 
     @PostConstruct
-    public void loadAirportRecords() throws URISyntaxException, IOException {
+    public void loadAirportRecords() throws IOException {
         InputStream airportsPath = new ClassPathResource("airports.dat").getInputStream();
         InputStream routesPath = new ClassPathResource("routes.dat").getInputStream();
         AirportsFileReader airportsFileReader = new AirportsFileReader();
@@ -55,7 +55,7 @@ public class SixfoldTestTaskApplication {
         List<RouteRecord> routeRecords = routesFileReader.readFile(routesPath);
 
         airports.loadRecords(airportRecords);
-        calculator.buildModel(airports, routeRecords);
+        calculator.load(airports, routeRecords);
     }
 
     @GetMapping(path = "/from/{fromId}/to/{toId}")
@@ -86,14 +86,6 @@ public class SixfoldTestTaskApplication {
         long requestTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
         logger.info("Handled request within {} ms", requestTime);
         return ResponseEntity.ok(payload);
-    }
-
-    @GetMapping("airport/{airportId}")
-    public Object getAirportConnections(@PathVariable String airportId) {
-        return calculator.getAirportConnections(airportId).stream()
-                .map(iataOrIcao -> airports.getRecord(iataOrIcao))
-                .map(AirportPayload::from)
-                .collect(toList());
     }
 
     private String distanceInKm(double distanceInMeters) {

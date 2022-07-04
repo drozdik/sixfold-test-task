@@ -7,14 +7,12 @@ import task.sixfold.Airports;
 import task.sixfold.algo.Airport;
 import task.sixfold.algo.AlgoResult;
 import task.sixfold.algo.MyAlgo;
-import task.sixfold.algo.Route;
 import task.sixfold.file.RouteRecord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 /* build model from records
@@ -23,19 +21,27 @@ public class RouteCalculator {
     Logger logger = LoggerFactory.getLogger(RouteCalculator.class);
 
     private MyAlgo myAlgo = new MyAlgo();
-    private Map<AirportIdentifier, Airport> airportNodes;
     private Airports airports;
+    private List<RouteRecord> routes;
 
     public Result shortestRouteBetween(String fromId, String toId) {
+        Map<AirportIdentifier, Airport> airportNodes = this.createModel(airports, routes);
         Airport sourceAirport = airportNodes.get(airports.getId(fromId));
         Airport destAirport = airportNodes.get(airports.getId(toId));
         AlgoResult algoResult = myAlgo.findShortestRoute(sourceAirport, destAirport, new ArrayList<>(airportNodes.values()));
         return Result.from(algoResult);
     }
 
-    public void buildModel(Airports airports, List<RouteRecord> routes) {
+    public void load(Airports airports, List<RouteRecord> routes) {
+        this.routes = routes;
+        this.airports = airports;
+    }
+
+    private Map<AirportIdentifier, Airport> createModel(Airports airports, List<RouteRecord> routes) {
         Map<AirportIdentifier, Airport> model = new HashMap<>();
+        // create nodes
         airports.entries().forEach(entry -> model.put(entry.getKey(), entry.getValue().toAirportNode()));
+        // set connections
         routes.forEach(record -> {
             Airport source = model.get(airports.getId(record.sourceAirport));
             Airport destination = model.get(airports.getId(record.destinationAirport));
@@ -45,13 +51,6 @@ public class RouteCalculator {
             }
             source.addConnectionWith(destination);
         });
-        this.airportNodes = model;
-        this.airports = airports;
+        return model;
     }
-
-    public List<String> getAirportConnections(String airportId) {
-        Airport airport = airportNodes.get(airports.getId(airportId));
-        return airport.getConnections().stream().map(c -> c.getIdentifier()).collect(Collectors.toList());
-    }
-
 }

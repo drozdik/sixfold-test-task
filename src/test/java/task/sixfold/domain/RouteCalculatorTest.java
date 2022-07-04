@@ -3,9 +3,7 @@ package task.sixfold.domain;
 import org.junit.jupiter.api.Test;
 import task.sixfold.Airports;
 import task.sixfold.file.AirportRecord;
-import task.sixfold.file.AirportsFileReader;
 import task.sixfold.file.RouteRecord;
-import task.sixfold.file.RoutesFileReader;
 
 import java.util.List;
 
@@ -37,7 +35,7 @@ class RouteCalculatorTest {
         Airports airports = new Airports();
         airports.loadRecords(List.of(tallinn, riga));
 
-        calculator.buildModel(airports, List.of(tallinn_to_riga));
+        calculator.load(airports, List.of(tallinn_to_riga));
 
         // when
         List<String> route = calculator.shortestRouteBetween(tallinn.ICAO, riga.ICAO).route;

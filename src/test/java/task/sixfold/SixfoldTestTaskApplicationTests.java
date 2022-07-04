@@ -1,6 +1,5 @@
 package task.sixfold;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,7 +36,7 @@ class SixfoldTestTaskApplicationTests {
                 ",56.92359924316406,23.971099853515625,36,2,\"E\",\"Europe/Riga\",\"airport\",\"OurAirports\"" +
                 "");
         RouteRecord tallinn_to_riga = RouteRecord.from("BT,333,TLL,415,RIX,3953,,0,73C DH4");
-        calculator.buildModel(new Airports(List.of(tallinn, riga)), List.of(tallinn_to_riga));
+        calculator.load(new Airports(List.of(tallinn, riga)), List.of(tallinn_to_riga));
 
 
         // when then
@@ -69,7 +68,7 @@ class SixfoldTestTaskApplicationTests {
                 "3953,\"Riga International Airport\",\"Riga\",\"Latvia\",\"RIX\",\"EVRA\"" +
                 ",56.92359924316406,23.971099853515625,36,2,\"E\",\"Europe/Riga\",\"airport\",\"OurAirports\"" +
                 "");
-        calculator.buildModel(new Airports(List.of(tallinn, riga)), Collections.emptyList());
+        calculator.load(new Airports(List.of(tallinn, riga)), Collections.emptyList());
 
         // NO ROUTES LOADED, MEANS NO CONNECTION BETWEEN TLL AND RIX
 
