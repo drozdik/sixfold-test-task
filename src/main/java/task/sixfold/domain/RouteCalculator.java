@@ -7,11 +7,9 @@ import task.sixfold.Airports;
 import task.sixfold.algo.Airport;
 import task.sixfold.algo.AlgoResult;
 import task.sixfold.algo.MyAlgo;
-import task.sixfold.file.RouteRecord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -22,34 +20,26 @@ public class RouteCalculator {
 
     private MyAlgo myAlgo = new MyAlgo();
     private Airports airports;
-    private List<RouteRecord> routes;
 
     public Result shortestRouteBetween(String fromId, String toId) {
-        Map<AirportIdentifier, Airport> airportNodes = this.createModel(airports, routes);
+        Map<AirportIdentifier, Airport> airportNodes = this.createModel(airports);
         Airport sourceAirport = airportNodes.get(airports.getId(fromId));
         Airport destAirport = airportNodes.get(airports.getId(toId));
         AlgoResult algoResult = myAlgo.findShortestRoute(sourceAirport, destAirport, new ArrayList<>(airportNodes.values()));
         return Result.from(algoResult);
     }
 
-    public void load(Airports airports, List<RouteRecord> routes) {
-        this.routes = routes;
+    public void load(Airports airports) {
         this.airports = airports;
     }
 
-    private Map<AirportIdentifier, Airport> createModel(Airports airports, List<RouteRecord> routes) {
+    private Map<AirportIdentifier, Airport> createModel(Airports airports) {
         Map<AirportIdentifier, Airport> model = new HashMap<>();
-        // create nodes
         airports.entries().forEach(entry -> model.put(entry.getKey(), entry.getValue().toAirportNode()));
-        // set connections
-        routes.forEach(record -> {
-            Airport source = model.get(airports.getId(record.sourceAirport));
-            Airport destination = model.get(airports.getId(record.destinationAirport));
-            if (source == null || destination == null) {
-                logger.warn("Skipping connection {} because either src or dest missing in model", record);
-                return;
-            }
-            source.addConnectionWith(destination);
+        model.entrySet().forEach((Map.Entry<AirportIdentifier, Airport> entry) -> {
+            airports.getConnections(entry.getKey()).forEach(connection -> {
+                entry.getValue().addConnectionWith(model.get(connection));
+            });
         });
         return model;
     }

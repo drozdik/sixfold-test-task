@@ -33,9 +33,9 @@ class RouteCalculatorTest {
         tallinn_to_riga.destinationAirport = riga.IATA;
 
         Airports airports = new Airports();
-        airports.loadRecords(List.of(tallinn, riga));
+        airports.loadBoth(List.of(tallinn, riga), List.of(tallinn_to_riga));
 
-        calculator.load(airports, List.of(tallinn_to_riga));
+        calculator.load(airports);
 
         // when
         List<String> route = calculator.shortestRouteBetween(tallinn.ICAO, riga.ICAO).route;

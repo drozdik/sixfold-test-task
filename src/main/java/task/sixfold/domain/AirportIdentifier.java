@@ -3,6 +3,8 @@ package task.sixfold.domain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 public class AirportIdentifier {
 
     Logger logger = LoggerFactory.getLogger(AirportIdentifier.class);
@@ -55,5 +57,18 @@ public class AirportIdentifier {
 
     public void setIcao(String icao) {
         this.icao = icao;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AirportIdentifier that = (AirportIdentifier) o;
+        return Objects.equals(iata, that.iata) && Objects.equals(icao, that.icao);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(iata, icao);
     }
 }

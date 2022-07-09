@@ -21,7 +21,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -54,8 +53,8 @@ public class SixfoldTestTaskApplication {
         RoutesFileReader routesFileReader = new RoutesFileReader();
         List<RouteRecord> routeRecords = routesFileReader.readFile(routesPath);
 
-        airports.loadRecords(airportRecords);
-        calculator.load(airports, routeRecords);
+        airports.loadBoth(airportRecords, routeRecords);
+        calculator.load(airports);
     }
 
     @GetMapping(path = "/from/{fromId}/to/{toId}")
